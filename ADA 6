@@ -1,0 +1,75 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# Definir los estados y sus relaciones correspondientes
+estados = {
+    "CDMX": {"Puebla": 135, "Estado de México": 50, "Morelos": 90},
+    "Puebla": {"CDMX": 135, "Veracruz": 270},
+    "Estado de México": {"CDMX": 50, "Hidalgo": 155, "Querétaro": 215},
+    "Morelos": {"CDMX": 90, "Guerrero": 190},
+    "Veracruz": {"Puebla": 270, "Oaxaca": 305},
+    "Hidalgo": {"Estado de México": 155, "Querétaro": 180},
+    "Querétaro": {"Estado de México": 215, "Hidalgo": 180, "Guanajuato": 100},
+    "Guerrero": {"Morelos": 190, "Oaxaca": 220},
+    "Oaxaca": {"Veracruz": 305, "Guerrero": 220, "Chiapas": 230},
+    "Guanajuato": {"Querétaro": 100, "Michoacán": 220},
+    "Chiapas": {"Oaxaca": 230, "Tabasco": 225},
+    "Tabasco": {"Chiapas": 225, "Campeche": 235},
+    "Campeche": {"Tabasco": 235, "Yucatán": 320},
+    "Yucatán": {"Campeche": 320}
+}
+
+# Crear el grafo
+G = nx.Graph()
+
+# Agregar los nodos al grafo
+for estado in estados.keys():
+    G.add_node(estado)
+
+# Agregar las relaciones con sus costos al grafo
+for origen, destinos in estados.items():
+    for destino, costo in destinos.items():
+        G.add_edge(origen, destino, weight=costo)
+
+# Función para calcular el costo total del recorrido
+def calcular_costo_total(camino):
+    costo_total = 0
+    for i in range(len(camino) - 1):
+        origen = camino[i]
+        destino = camino[i + 1]
+        costo_total += estados[origen][destino]
+    return costo_total
+
+# Función para encontrar todos los caminos sin repetir estados
+def encontrar_caminos_sin_repetir():
+    return list(nx.all_simple_paths(G, source="CDMX", target="Yucatán"))
+
+# Función para encontrar todos los caminos repitiendo al menos un estado
+def encontrar_caminos_con_repetir():
+    return list(nx.all_simple_paths(G, source="CDMX", target="Yucatán", cutoff=None))
+
+# Dibujar el grafo
+pos = nx.spring_layout(G)
+nx.draw(G, pos, with_labels=True, node_size=700, node_color='lightblue', font_size=10)
+labels = nx.get_edge_attributes(G, 'weight')
+nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+plt.title("Grafo de los estados de la República Mexicana")
+plt.show()
+
+# Calcular y mostrar los caminos sin repetir estados
+print("Caminos sin repetir estados:")
+caminos_sin_repetir = encontrar_caminos_sin_repetir()
+for camino in caminos_sin_repetir:
+    costo_total = calcular_costo_total(camino)
+    print("Camino:", camino)
+    print("Costo total:", costo_total)
+    print()
+
+# Calcular y mostrar los caminos repitiendo al menos un estado
+print("Caminos repitiendo al menos un estado:")
+caminos_con_repetir = encontrar_caminos_con_repetir()
+for camino in caminos_con_repetir:
+    costo_total = calcular_costo_total(camino)
+    print("Camino:", camino)
+    print("Costo total:", costo_total)
+    print()
